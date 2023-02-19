@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Feb 18 16:05:52 2023
+Created on Sun Feb 19 11:33:47 2023
 
 @author: mysys
 """
-
 
 import socket, sys
 import threading
@@ -12,28 +11,22 @@ import threading
 host='127.0.0.1'
 port=12000
 
-##      _Nos classes:       ##
-## -Pour gérer les emissions et la recption
-## -des messages en parallèle
-      
-
-def ThreadReception(connexion):
+def Reception(connexion):
         while 1:
             msg_recu = connexion.recv(1024).decode('utf8')
             print("*"+msg_recu+"*")
             if msg_recu == "" or msg_recu.upper() == "FIN":
                 break
-        #Le thread <receptiion> se termine ici.
-        #On force la fermeture du thread <emission>
+        
         #th_E._stop()
         #print("Client arrêté. Connexion interrompu.")
         #connexion.close()
         
 
 
-def ThreadEmission(connexion):
+def Emission(connexion):
         while 1:
-            msg_emi=input("écrit: ")
+            msg_emi=input("écrire: ")
             connexion.send(msg_emi.encode('utf8'))
       
 
@@ -52,13 +45,13 @@ print("Connexion établie avec le serveur.")
 
 #Dialogue avec le serveur: on lance deux threads pour gérer
 #independamment l'emission et la reception des messages.
-th_E = threading.Thread(target=(ThreadEmission), args=[connexion])
-th_R = threading.Thread(target=(ThreadReception), args=[connexion])
+th_E = threading.Thread(target=(Emission), args=[connexion])
+th_R = threading.Thread(target=(Reception), args=[connexion])
 th_E.start()
 th_R.start()
 
-th_E.join()
 th_R.join()
+#th_E._stop()
 
 print("Client arrêté. Connexion interrompu.")
 connexion.close()

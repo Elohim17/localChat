@@ -6,15 +6,12 @@ Created on Sat Feb 18 15:29:06 2023
 """
 
 
-#Définition d'un serveur réseau gérant un système de CHAT simplifié.
-#Utilise les threads pour gérer les connexions en parallèle
+import socket, sys, threading
 
 host='127.0.0.1'
 port=12000
 
-import socket, sys, threading
-
-def ThreadClient(connexion):
+def gestionClient(connexion):
         
         #Dealogue avec le client :
         nom = input("Entrez votre nom: ")
@@ -33,9 +30,10 @@ def ThreadClient(connexion):
                 
         #Fermeture de la connexion :
         connexion.close()      #Couper la connexion (du clent) côté serveur
-        del conn_client[connexion]        #Supprimer son entrée dans le dictionnaire
+        del conn_client[it]        #Supprimer son entrée dans le dictionnaire
         print("Client %s déconnecté." % nom)
         #Fin du thread
+
 
 #initialisation du serveur - Mise en place du socket:
 mySocket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,16 +47,17 @@ mySocket.listen(5)
 
 #Attente et prise en charge des connexions demandées par les client :
 conn_client={}
+it=""
 while 1:
     connexion, adresse = mySocket.accept()
     
     #Créer un nouvel objet thread pour gérer la connexion :
-    #th = ThreadClient(connexion)
-    th = threading.Thread(target=(ThreadClient), args=[connexion])
+    
+    th = threading.Thread(target=(gestionClient), args=[connexion])
     th.start()
     
     #Mémoriser la connexion dans le dictionnaire :
-    it = th.getName()
+    it = th.getName() #doit etre associer au nom
     conn_client[it]=connexion
     print("Client %s connecté, adresse IP: %s, port %s." % (it, adresse[0], adresse[1]))
     
@@ -66,10 +65,5 @@ while 1:
     msg ="Vous êtes connecté. Envoyez vos messages."
     connexion.send(msg.encode('utf8'))
     
-    th.join()
     
-    #Fermeture de la connexion :
-    connexion.close()      #Couper la connexion (du clent) côté serveur
-    del conn_client[connexion]        #Supprimer son entrée dans le dictionnaire
-    print("Client %s déconnecté." % nom)
-    #Fin du thread
+    #Fermeture
